@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean
-from .database import Base
+from sqlalchemy import Column, Integer, String
+import database
 
-class Worker(Base):
+class Worker(database.Base):
     __tablename__ = "workers"
-
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
     location = Column(String)

@@ -1,14 +1,13 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-from . import models
-from . import database
+import models
+import database
 
-# Create the actual database file and tables
-models.Base.metadata.create_all(bind=database.engine)
+# Create the database file immediately
+models.database.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
-# Dependency to get a database connection
 def get_db():
     db = database.SessionLocal()
     try:
@@ -17,7 +16,7 @@ def get_db():
         db.close()
 
 @app.get("/workers")
-def read_workers(db: Session = Depends(get_db)):
+def get_workers(db: Session = Depends(get_db)):
     return db.query(models.Worker).all()
 
 @app.post("/workers")
