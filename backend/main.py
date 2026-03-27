@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import models
 import database
@@ -7,6 +8,16 @@ import database
 models.database.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
+
+# This allows your React app to talk to your Python app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def get_db():
     db = database.SessionLocal()
