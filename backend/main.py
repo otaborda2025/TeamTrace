@@ -37,3 +37,36 @@ def create_worker(name: str, location: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_worker)
     return new_worker
+
+@app.delete("/workers/{worker_id}")
+def delete_worker(worker_id: int, db: Session = Depends(get_db)):
+    # 1. Look for the worker in the database
+    db_worker = db.query(models.Worker).filter(models.Worker.id == worker_id).first()
+    
+    # 2. If it's not there, tell the user
+    if db_worker is None:
+        return {"message": "Worker not found"}
+        
+    # 3. If it is there, delete it and save
+    db.delete(db_worker)
+    db.commit()
+    return {"message": f"Worker {worker_id} deleted successfully"}
+
+
+@app.put("/workers/{worker_id}")
+def update_worker(worker_id: int, name: str, location: str, db: Session = Depends(get_db)):
+    # 1. Look for the worker in the database
+    db_worker = db.query(models.Worker).filter(models.Worker.id == worker_id).first()
+    
+    # 2. If it's not there, tell the user
+    if db_worker is None:
+        return {"message": "Worker not found"}
+        
+    # 3. If it is there, update the fields
+    db_worker.name = name
+    db_worker.location = location
+    
+    # 4. Save the changes to the database
+    db.commit()
+    db.refresh(db_worker)
+    return {"message": f"Worker {worker_id} updated successfully"}
