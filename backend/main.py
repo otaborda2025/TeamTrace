@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.auth.routes import router as auth_router
 from app.users.routes import router as users_router
+from app.jobsites.routes import router as jobsites_router
 
 #To call create_all in developing fase.
 
@@ -8,7 +9,7 @@ from app.users.routes import router as users_router
 from app.database.session import Base, engine
 import app.users.models
 import app.companies.models
-#import app.jobsites.models
+import app.jobsites.models
 #import app.projects.models
 
 Base.metadata.create_all(bind=engine)
@@ -18,12 +19,16 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="TeamTrace API",
-    version="0.1.0"
+    version="0.1.0",
+    swagger_ui_parameters={
+        "persistAuthorization": True
+    }
 )
-
+  
 
 app.include_router(auth_router)
 app.include_router(users_router)
+#app.include_router(jobsites_router)
 
 
 @app.get("/")

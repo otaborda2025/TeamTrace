@@ -50,7 +50,7 @@ def get_user(
     db: Session = Depends(get_db),
     current_user=Depends(require_role([UserRole.OWNER, UserRole.ADMIN]))
 ):
-    return users_service.get_user(user_id,current_user, db)
+    return users_service.get_user(user_id,current_user.company_id, db)
 
 
 #Update user

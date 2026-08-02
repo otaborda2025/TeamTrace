@@ -9,7 +9,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # 2. Secret keys (In production, move these to a hidden .env file!)
 SECRET_KEY = "SUPER_SECRET_TEAM_TRACE_KEY_DO_NOT_SHARE"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 365
 MAX_PASSWORD_LENGTH = 72
 
 

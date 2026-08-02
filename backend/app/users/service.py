@@ -1,9 +1,21 @@
 from fastapi import HTTPException
-
 from app.users.models import User
 from app.users.constants import UserRole
+from app.core import security, utils
 
-from app.core import security
+
+def get_user(
+    user_id: int,
+    company_id: int,
+    db: Session
+) -> User:
+    return utils.get_object(
+        db.query(User).filter(
+            User.id == user_id,
+            User.company_id == company_id
+        ),
+        "User not found"
+    )
 
 
 #Register user
@@ -40,17 +52,7 @@ def register_user(
 
     db.add(new_user)
     db.commit()
-    db.refresh(new_user)
-    
-    print("ID:", new_user.id)
-    print("Company:", new_user.company_id)
-    print("First:", new_user.first_name)
-    print("Last:", new_user.last_name)
-    print("Email:", new_user.email)
-    print("Role:", new_user.role)
-    print("Active:", new_user.is_active)
-
-
+    db.refresh(new_user)  
     return new_user
 
 
@@ -69,27 +71,6 @@ def get_users(
         .all()
     )
 
-#Get one user
-def get_user(
-    user_id: int,
-    current_user,
-    db: Session
-):
-    user = (
-        db.query(User)
-        .filter(User.company_id == current_user.company_id, User.id==user_id)
-        .first()
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found"
-        )
-
-    return user
-
-
 #Update user
 def update_user(
     user_id: int,
@@ -98,18 +79,7 @@ def update_user(
     db: Session
 
 ):
-    existing_user = (
-        db.query(User)
-        .filter(User.company_id==current_user.company_id, User.id == user_id)
-        .first()
-    )
-
-    if not existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="User not found"
-        )
-
+    existing_user = get_user(user_id, current_user.company_id, db)
 
     updates = user_data.model_dump(exclude_unset=True)
 
@@ -128,17 +98,7 @@ def delete_user(
     current_user: User,
     db: Session
 ):
-    user = (
-        db.query(User)
-        .filter(User.company_id == current_user.company_id, User.id == user_id)
-        .first()
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+    user = get_user(user_id, current_user.company_id, db)
 
     if user.id == current_user.id:
         raise HTTPException(
@@ -163,17 +123,7 @@ def deactivate_user(
     current_user: User,
     db: Session
 ):
-    user = (
-        db.query(User)
-        .filter(User.company_id == current_user.company_id, User.id == user_id)
-        .first()
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+    user = get_user(user_id, current_user.company_id, db)
 
     if user.id == current_user.id:
         raise HTTPException(
@@ -201,17 +151,7 @@ def activate_user(
     current_user: User,
     db: Session
 ):
-    user = (
-        db.query(User)
-        .filter(User.company_id == current_user.company_id, User.id == user_id)
-        .first()
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+    user = get_user(user_id, current_user.company_id, db)
 
     user.is_active = True
 
@@ -228,17 +168,7 @@ def update_user_role(
     current_user: User,
     db: Session
 ):
-    user = (
-        db.query(User)
-        .filter(User.company_id == current_user.company_id, User.id == user_id)
-        .first()
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+    user = (user_id, current_user.company_id, db)
 
     if user.id == current_user.id:
         raise HTTPException(
